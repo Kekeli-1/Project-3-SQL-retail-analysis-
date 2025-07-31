@@ -33,5 +33,5 @@ business insights across sales, inventory, and pricing performance.
    [https://medium.com/@kekelibeddy1553/data-to-decisions-actionable-retail-insights-from-sql-analysis-of-inventory-sales-cdd9c138f08c]
 
    ## Connect with me on linkedIN
-   
+   [https://www.linkedin.com/in/kekeli-beddy-2290b02aa]
 

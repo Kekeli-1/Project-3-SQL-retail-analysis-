@@ -1,0 +1,119 @@
+
+select `product id`, `Return Rate (%)` from pricingt
+order by `Return Rate (%)` desc
+limit 5;
+select  date_format(f.date,'%Y-%m') as month, round(avg(p.`return rate (%)`),2) as avg from forcasting f 
+join PricingT p on f.`Product id`= p.`product id`
+group by  date_format(f.date,'%Y-%m')
+order by avg desc;
+select `product id`, `Competitor Prices`,price, sum(`sales volume`) as sales_total from pricingT
+Group by `product id`,`Competitor Prices`, price
+order by sales_total desc;
+
+with stockoutdates as(
+select f.`product ID`, f.date,m.`Stockout Frequency`, lead(f.date) over (partition by f.`product id` order by f.date) as next_stockout_date
+from forcasting f
+join monitory m on f.`Product id` = m. `product id`;
+select * from stockoutdates 
+where next_stockout_date = date;
+from forcasting f
+select `product id`, avg(Datediff(next_stockout_date, current_date)) as avg_date_until_next_stockout
+from stockoutdates 
+where  next_stockout_date  is not NULL
+group by `product id` 
+order by avg_date_until_next_stockout DESC;
+select * from PricingT;
+select * from forcasting;
+select * from monitoring
+\
+select `Product id`, `Store ID`, sum(`sales quantity`) as total from forcasting 
+group by `Store ID`,`Product id`
+order by total desc;
+
+select sum(`sales quantity`) as total, `seasonality factors` from forcasting
+group by `seasonality factors`
+order by total desc;
+
+
+select sum(`sales quantity`) as total, extract(month from date) as month from forcasting
+
+group by month
+
+order by total DESC;
+
+select `Product id`,`Stockout Frequency`, `Stock levels` from monitory
+where `Stock levels`< `Reorder Point` 
+order by `Stockout Frequency`Desc;
+
+select  p.`store id`, round(sum(f.`sales quantity`* p.`price`),2) as revenue, extract(month from date) as month from pricingt p
+join forcasting f on  p.`store id` = f.`store id`
+group by  p.`store id`, month
+order by revenue, month desc;
+
+select f.`Product id`, sum(f.`sales quantity`) as `total_sales`, max(m.`Stockout Frequency`) as fr from 
+forcasting f 
+ join monitory m on f.`Product id`= m.`Product id`
+Group by f.`Product id`, m.`Stockout frequency`
+having  m.`Stockout frequency` > 5 and sum(f.`sales quantity`) > (select avg(`sales quantity`) from forcasting)
+order by m.`Stockout frequency`desc;
+
+select `Product id`, max(price) as price, max(`competitor prices`) as c_prices, sum(`sales Volume`) as `total` from pricingt 
+group by `Product id`
+Having max(price) > max(`competitor prices`) and sum(`sales Volume`) < 0.5 *  (select avg(`sales Volume`) from pricingt);
+
+select `Product id`, `Expiry Date`,`Store ID`, `Stock Levels` from monitory 
+where `Expiry Date`< CURRENT_DATE() + interval 30 day
+order by `Stock Levels` DESC ;
+
+
+select `Product id`, sum(`sales Quantity`) as total, `customer segments` from forcasting 
+group by `customer segments` ,`Product id`
+order by total desc;
+
+select `Product id`, sum(`sales volume`) as total, `Return Rate (%)` from pricingt
+group by `Product ID`,`Return Rate (%)`
+order by total desc;
+
+select  f.`Product ID` , sum(f.`sales quantity`) as total, p.`competitor Prices`, p.`Elasticity Index`, m.`Stock levels` from pricing p 
+join forcasting f  on p.`product id` = f.`Product ID`
+join monitory m on p.`product id` = m.`product id`
+group by f.`Product ID`, p.`competitor Prices`,p.`Elasticity Index`, m.`Stock levels`
+order by total desc;
+
+select * from forcasting F
+left join pricingt p on f.`Product ID` = p.`Product ID` ;
+
+
+select f.`Product ID`, m. `stockout frequency`, f.`demand trend`  from  monitory m 
+
+join forcasting f on m.`Product ID`= f.`Product ID`
+
+where f.`demand trend` = 'increasing'
+
+group by f.`Product ID`,m. `stockout frequency`
+
+order by m. `stockout frequency` desc;
+
+select `Product ID`, `Stock levels`,`Warehouse Capacity` from monitoring m 
+where m.`Stock Levels`  < `Warehouse Capacity`;
+select `Product ID`,`Supplier Lead Time (days)`, `Reorder Point`, `Stock Levels` from  monitory 
+where `Stock Levels` <= `Reorder Point`;
+select `Product ID`,`Supplier Lead Time (days)` from  monitory 
+order by  `Supplier Lead Time (days)` asc;
+
+select `Product ID`, `Stock levels`,`Warehouse Capacity` from monitoring m 
+where m.`Stock Levels`  < `Warehouse Capacity`;
+
+select count(`product id`) as total, `Customer Reviews` from pricingt 
+group by `Customer Reviews`
+order by total desc;
+
+select `Product ID`, `sales volume`, `storage cost` from pricingt p 
+where `sales volume` < 100
+
+order by `storage cost` desc;
+
+select `product ID`, date, `sales quantity`, lag(`sales volume`) over (partition by `product id` order by date) as prev_sales,
+`sales volume`- lag(`sales volume`) over (partition by `product id` order by date) AS sales_diff from forcasting
+order by sales_diff desc
+limit 5;
